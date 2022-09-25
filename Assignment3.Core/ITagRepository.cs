@@ -1,5 +1,4 @@
 namespace Assignment3.Core;
-
 public interface ITagRepository
 {
     (Response Response, int TagId) Create(TagCreateDTO tag);
