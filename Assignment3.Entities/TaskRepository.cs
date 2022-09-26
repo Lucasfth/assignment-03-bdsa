@@ -79,14 +79,55 @@ public class TaskRepository : ITaskRepository
 
         return new ReadOnlyCollection<TaskDTO>(temp);
     }
+
     public IReadOnlyCollection<TaskDTO> ReadAllByUser(int userId)
     {
-        throw new NotImplementedException();
+        var temp = new Collection<TaskDTO>();
+
+        foreach (var task in tasks)
+        {
+            var tags = new Collection<string>();
+            if (task.Tags != null)
+            {
+                foreach (var t in task.Tags)
+                {
+                    tags.Add(t.Name);
+                }
+            }
+
+            if (task.AssignedTo.Id == userId)
+            {
+                temp.Add(new TaskDTO(task.Id, task.Title, task.AssignedTo.Name, tags, task.State));
+            }
+        }
+
+        return new ReadOnlyCollection<TaskDTO>(temp);
     }
+
     public IReadOnlyCollection<TaskDTO> ReadAllByState(State state)
     {
-        throw new NotImplementedException();
+        var temp = new Collection<TaskDTO>();
+
+        foreach (var task in tasks)
+        {
+            var tags = new Collection<string>();
+            if (task.Tags != null)
+            {
+                foreach (var t in task.Tags)
+                {
+                    tags.Add(t.Name);
+                }
+            }
+
+            if (task.State == state)
+            {
+                temp.Add(new TaskDTO(task.Id, task.Title, task.AssignedTo.Name, tags, task.State));
+            }
+        }
+
+        return new ReadOnlyCollection<TaskDTO>(temp);
     }
+        
     public TaskDetailsDTO Read(int taskId)
     {
         throw new NotImplementedException();

@@ -297,4 +297,138 @@ public class TaskRepositoryTests
         // Assert
         actual.Should().BeEquivalentTo(expected);
     }
+
+    [Fact]
+    public void ReadAllByUser_Should_Only_Return_User_2()
+    {
+        // Arrange
+        TaskRepository taskRepo = new TaskRepository();
+        Task task1 = new Task();
+        Task task2 = new Task();
+        Task task3 = new Task();
+        Task task4 = new Task();
+
+        task1.Description = "Her kommer";
+        task2.Description = "Pippi Langstromp";
+        task3.Description = "Chula hop";
+        task4.Description = "Chula hey";
+        task1.Id = 1;
+        task2.Id = 2;
+        task3.Id = 3;
+        task4.Id = 4;
+        task1.State = State.Removed;
+        task2.State = State.Closed;
+        task3.State = State.New;
+        task4.State = State.Removed;
+        task1.Title = "strofe1";
+        task2.Title = "strofe2";
+        task3.Title = "strofe3";
+        task4.Title = "strofe4";
+        User user1 = new User();
+        User user2 = new User();
+        User user3 = new User();
+        User user4 = new User();
+        user1.Name = "Bank";
+        user2.Name = "Silas";
+        user3.Name = "Lucas";
+        user4.Name = "MyName";
+        user1.Id = 1;
+        user2.Id = 2;
+        user3.Id = 3;
+        user4.Id = 4;
+        task1.AssignedTo = user1;
+        task2.AssignedTo = user2;
+        task3.AssignedTo = user3;
+        task4.AssignedTo = user4;
+        Tag tag1 = new Tag();
+        Tag tag2 = new Tag();
+        Tag tag3 = new Tag();
+        tag1.Name = "Fix";
+        tag2.Name = "Change";
+        tag3.Name = "Add";
+        var stringTags = new Collection<string>();
+
+        taskRepo.tasks.Add(task1);
+        taskRepo.tasks.Add(task2);
+        taskRepo.tasks.Add(task3);
+        taskRepo.tasks.Add(task4);
+        
+        var t = new Collection<TaskDTO>();
+        t.Add(new TaskDTO(task2.Id, task2.Title, task2.AssignedTo.Name, stringTags, task2.State));
+
+        var expected = new ReadOnlyCollection<TaskDTO>(t);
+        
+        // Act
+        var actual = taskRepo.ReadAllByUser(2);
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
+    
+    [Fact]
+    public void ReadAllByState_Should_Only_Return_task_2()
+    {
+        // Arrange
+        TaskRepository taskRepo = new TaskRepository();
+        Task task1 = new Task();
+        Task task2 = new Task();
+        Task task3 = new Task();
+        Task task4 = new Task();
+
+        task1.Description = "Her kommer";
+        task2.Description = "Pippi Langstromp";
+        task3.Description = "Chula hop";
+        task4.Description = "Chula hey";
+        task1.Id = 1;
+        task2.Id = 2;
+        task3.Id = 3;
+        task4.Id = 4;
+        task1.State = State.Removed;
+        task2.State = State.Closed;
+        task3.State = State.New;
+        task4.State = State.Removed;
+        task1.Title = "strofe1";
+        task2.Title = "strofe2";
+        task3.Title = "strofe3";
+        task4.Title = "strofe4";
+        User user1 = new User();
+        User user2 = new User();
+        User user3 = new User();
+        User user4 = new User();
+        user1.Name = "Bank";
+        user2.Name = "Silas";
+        user3.Name = "Lucas";
+        user4.Name = "MyName";
+        user1.Id = 1;
+        user2.Id = 2;
+        user3.Id = 3;
+        user4.Id = 4;
+        task1.AssignedTo = user1;
+        task2.AssignedTo = user2;
+        task3.AssignedTo = user3;
+        task4.AssignedTo = user4;
+        Tag tag1 = new Tag();
+        Tag tag2 = new Tag();
+        Tag tag3 = new Tag();
+        tag1.Name = "Fix";
+        tag2.Name = "Change";
+        tag3.Name = "Add";
+        var stringTags = new Collection<string>();
+
+        taskRepo.tasks.Add(task1);
+        taskRepo.tasks.Add(task2);
+        taskRepo.tasks.Add(task3);
+        taskRepo.tasks.Add(task4);
+        
+        var t = new Collection<TaskDTO>();
+        t.Add(new TaskDTO(task2.Id, task2.Title, task2.AssignedTo.Name, stringTags, task2.State));
+
+        var expected = new ReadOnlyCollection<TaskDTO>(t);
+        
+        // Act
+        var actual = taskRepo.ReadAllByState(State.Closed);
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
 }
