@@ -24,28 +24,23 @@ namespace Assignment3.Entities
         {
             modelBuilder.Entity<Task>(entity =>
             {
-                entity.Property(e => e.Id);
                 entity.Property(e => e.Title).HasMaxLength(100);
-                entity.Property(e => e.AssignedTo);
-                entity.Property(e => e.Description);
-                entity.Property(e => e.State);
-                entity.Property(e => e.Tags);
             });
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.Property(e => e.Id);
                 entity.Property(e => e.Name).HasMaxLength(100);
                 entity.Property(e => e.Email).HasMaxLength(100);
-                entity.Property(e => e.Tasks);
             });
 
             modelBuilder.Entity<Tag>(entity =>
             {
-                entity.Property(e => e.Id);
                 entity.Property(e => e.Name).HasMaxLength(50);
-                entity.Property(e => e.Tasks);
             });
+
+            modelBuilder.Entity<Task>()
+                .HasMany<Tag>(task => task.Tags)
+                .WithMany(tag => tag.Tasks);
 
             OnModelCreatingPartial(modelBuilder);
         }

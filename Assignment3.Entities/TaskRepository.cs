@@ -6,16 +6,28 @@ namespace Assignment3.Entities;
 
 public class TaskRepository : ITaskRepository
 {
-    public Collection<Task> tasks = new Collection<Task>();
+    public KanbanContext _context;
+    public TaskRepository(KanbanContext context)
+    {
+        _context = context;
+    }
     public (Response Response, int TaskId) Create(TaskCreateDTO task)
     {
-        throw new NotImplementedException();
+        Collection<Tag> tags = new Collection<Tag>();
+        foreach (var t in task.Tags)
+        {
+            tags.Add(new Tag(){Name = t});
+        }
+        var temp = new Task() { Title = task.Title, AssignedTo = new User() {Id = task.AssignedToId.Value, Name = "Mommy", Email = ""}, Description = task.Description, Tags = tags };
+        _context.Tasks.Add(temp);
+        _context.SaveChanges();
+        return (Response.Created, temp.Id);
     }
     
     public IReadOnlyCollection<TaskDTO> ReadAll()
     {
         var temp = new Collection<TaskDTO>();
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var t = new Collection<string>();
 
@@ -35,7 +47,7 @@ public class TaskRepository : ITaskRepository
     public IReadOnlyCollection<TaskDTO> ReadAllRemoved()
     {
         var temp = new Collection<TaskDTO>();
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var t = new Collection<string>();
             
@@ -58,7 +70,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             if (task.Tags != null)
             {
@@ -84,7 +96,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var tags = new Collection<string>();
             if (task.Tags != null)
@@ -108,7 +120,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var tags = new Collection<string>();
             if (task.Tags != null)
@@ -130,11 +142,49 @@ public class TaskRepository : ITaskRepository
         
     public TaskDetailsDTO Read(int taskId)
     {
-        throw new NotImplementedException();
+        foreach (var task in _context.Tasks)
+        {
+            var tags = new Collection<string>();
+            if (task.Tags != null)
+            {
+                foreach (var t in task.Tags)
+                {
+                    tags.Add(t.Name);
+                }
+            }
+
+            if (task.Id == taskId)
+            {
+               return new TaskDetailsDTO(task.Id, task.Title, task.Description, task.Created, task.AssignedTo.Name, tags, task.State, task.StateUpdated);
+            }
+        }
+
+        return new TaskDetailsDTO(-1, "NotFound", "", DateTime.Now, "NoOne", new Collection<string>(){"none"}, State.Closed, DateTime.Now);
     }
     public Response Update(TaskUpdateDTO task)
     {
-        throw new NotImplementedException();
+        foreach (var t in _context.Tasks)
+        {
+            if(t.Id == task.Id)
+            {
+                t.Title = task.Title;
+                t.AssignedTo.Id = task.AssignedToId.Value;
+                t.Description = task.Description;
+                
+                var tags = new List<Tag>();
+                foreach (var tag in task.Tags) {
+                    Tag tempTag = new Tag();
+                    tempTag.Name = tag;
+                    tags.Add(tempTag);
+                }
+                t.Tags = tags;
+                t.State = task.State;
+                t.StateUpdated = DateTime.Now;
+
+                return Response.Updated;
+            }
+        }
+        return Response.NotFound;
     }
     public Response Delete(int taskId)
     {

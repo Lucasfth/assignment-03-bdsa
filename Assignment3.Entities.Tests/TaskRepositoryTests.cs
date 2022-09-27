@@ -1,365 +1,167 @@
 using System.Collections.ObjectModel;
 using Assignment3.Core;
-using Microsoft.VisualBasic;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Entities.Tests;
 
 public class TaskRepositoryTests
 {
-    [Fact]
-    public void Read_All_Should_Show_All_Tasks()
-    {
-        // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
-
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Active;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Resolved;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        tag1.Name = "Fix";
-        tag2.Name = "Change";
-        tag3.Name = "Add";
-        var tags = new Collection<Tag>();
-        var stringTags = new Collection<string>();
-        tags.Add(tag1);
-        tags.Add(tag2);
-        tags.Add(tag3);
-        stringTags.Add(tag1.Name);
-        stringTags.Add(tag2.Name);
-        stringTags.Add(tag3.Name);
-        task1.Tags = tags;
-        task3.Tags = tags;
-        
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
-        
-        var t = new Collection<TaskDTO>();
-        t.Add(new TaskDTO(task1.Id, task1.Title, task1.AssignedTo.Name, stringTags, task1.State));
-        t.Add(new TaskDTO(task2.Id, task2.Title, task2.AssignedTo.Name, new Collection<string>(), task2.State));
-        t.Add(new TaskDTO(task3.Id, task3.Title, task3.AssignedTo.Name, stringTags, task3.State));
-        t.Add(new TaskDTO(task4.Id, task4.Title, task4.AssignedTo.Name, new Collection<string>(), task4.State));
-
-        var expected = new ReadOnlyCollection<TaskDTO>(t);
-        
-        // Act
-        var actual = taskRepo.ReadAll();
-        
-        // Assert
-        actual.Should().BeEquivalentTo(expected);
-    }
-
-    [Fact]
-    public void ReadAllRemoved_Should_Only_Read_Removed_Which_None_Is()
-    {
-        // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
-
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Active;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Resolved;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        tag1.Name = "Fix";
-        tag2.Name = "Change";
-        tag3.Name = "Add";
-        var tags = new Collection<Tag>();
-        var stringTags = new Collection<string>();
-        tags.Add(tag1);
-        tags.Add(tag2);
-        tags.Add(tag3);
-        stringTags.Add(tag1.Name);
-        stringTags.Add(tag2.Name);
-        stringTags.Add(tag3.Name);
-        task1.Tags = tags;
-        task3.Tags = tags;
-        
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
-        
-        var t = new Collection<TaskDTO>();
-
-        var expected = new ReadOnlyCollection<TaskDTO>(t);
-        
-        // Act
-        var actual = taskRepo.ReadAllRemoved();
-        
-        // Assert
-        actual.Should().BeEquivalentTo(expected);
-    }
+    private readonly KanbanContext _context;
+    private readonly TaskRepository _repository;
     
-    [Fact]
-    public void ReadAllRemoved_Should_Only_Read_Removed_Which_Two_Are()
-    {
-        // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
+    private DateTime time = new DateTime(2022, 12, 1);
 
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Removed;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Removed;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
+    public TaskRepositoryTests()
+    {
+        var connection = new SqliteConnection("Filename=:memory:");
+        connection.Open();
+        var builder = new DbContextOptionsBuilder<KanbanContext>();
+        builder.UseSqlite(connection);
+        var context = new KanbanContext(builder.Options);
+        context.Database.EnsureCreated();
+        User user1 = new User() {Name = "Bank", Email = "Mail"};
+        User user2 = new User() {Name = "Silas", Email = "Mail2"};
+        User user3 = new User() {Name = "Lucas", Email = "Mail3"};
+        User user4 = new User() {Name = "MyName", Email = "Mail4"};
+        var tags = Tags();
+        var tags2 = Tags2();
+        context.Users.AddRange(user1, user2, user3, user4);
+        context.Tasks.AddRange(new Task() { Title = "taskSQL" , AssignedTo = user1, Description = "Get SQL set up for program", State = State.Active, Tags = tags, Created = time, StateUpdated = time}, 
+            new Task() { Title = "taskAI", AssignedTo = user2,Description = "Set up AI for program", State = State.Closed, Tags = tags, Created = time, StateUpdated = time},
+            new Task() { Title = "taskAlgorithm", AssignedTo = user3, Description = "Set up algorithm", State = State.New, Tags = tags, Created = time, StateUpdated = time},
+            new Task() { Title = "taskSomething", AssignedTo = user4, Description = "Get something set up", State = State.Removed, Tags = tags2, Created = time, StateUpdated = time});
+        context.SaveChanges();
+
+        _context = context;
+        _repository = new TaskRepository(_context);
+    }
+
+    private List<Tag> Tags()
+    {
         Tag tag1 = new Tag();
         Tag tag2 = new Tag();
         Tag tag3 = new Tag();
         tag1.Name = "Fix";
         tag2.Name = "Change";
         tag3.Name = "Add";
-        var tags = new Collection<Tag>();
-        var stringTags = new Collection<string>();
+        var tags = new List<Tag>();
         tags.Add(tag1);
         tags.Add(tag2);
         tags.Add(tag3);
-        stringTags.Add(tag1.Name);
-        stringTags.Add(tag2.Name);
-        stringTags.Add(tag3.Name);
-        task1.Tags = tags;
-        task3.Tags = tags;
-        
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
-        
-        var t = new Collection<TaskDTO>();
-        t.Add(new TaskDTO(task1.Id, task1.Title, task1.AssignedTo.Name, stringTags, State.Removed));
-        t.Add(new TaskDTO(task4.Id, task4.Title, task4.AssignedTo.Name, new Collection<string>(), State.Removed));
+        return tags;
+    }
 
-        var expected = new ReadOnlyCollection<TaskDTO>(t);
+    private Collection<Tag> Tags2()
+    {
+        Tag tag = new Tag();
+        tag.Name = "Help";
+        var tags = new Collection<Tag>();
+        tags.Add(tag);
+        return tags;
+    }
+
+    private Collection<string> TagsString()
+    {
+        var tags = new Collection<string>();
+        tags.Add("Fix");
+        tags.Add("Change");
+        tags.Add("Add");
+        return tags;
+    }
+
+    private Collection<string> Tags2String()
+    {
+        var tags = new Collection<string>();
+        tags.Add("Help");
+        return tags;
+    }
+
+    [Fact]
+    public void Create_Should_Return_Created()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var t = new TaskCreateDTO("New one", 6, "Another one", tags);
+        var expected = (Response.Created, 5);
         
         // Act
-        var actual = taskRepo.ReadAllRemoved();
+        var actual = _repository.Create(t);
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
     }
-    
+
+    [Fact]
+    public void ReadAll_Should_Show_All_Tasks()
+    {
+        var tags = TagsString();
+        var tags2 = Tags2String();
+        
+        var t = new Collection<TaskDTO>();
+        t.Add(new TaskDTO(1, "taskSQL", "Bank", tags, State.Active));
+        t.Add(new TaskDTO(2, "taskAI", "Silas", tags, State.Closed));
+        t.Add(new TaskDTO(3, "taskAlgorithm", "Lucas", tags, State.New));
+        t.Add(new TaskDTO(4, "taskSomething", "MyName", tags2, State.Removed));
+
+        var expected = new ReadOnlyCollection<TaskDTO>(t);
+        
+        // Act
+        var actual = _repository.ReadAll();
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void ReadAllRemoved_Should_Only_Read_Removed_Which_One_Is()
+    {
+        // Arrange
+        var tags = Tags2String();
+        
+        var t = new Collection<TaskDTO>();
+        t.Add(new TaskDTO(4, "taskSomething", "MyName", tags ,State.Removed));
+        
+        var expected = new ReadOnlyCollection<TaskDTO>(t);
+        
+        // Act
+        var actual = _repository.ReadAllRemoved();
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
+
     [Fact]
     public void ReadAllByTag_Should_Only_Return_Tasks_Which_Holds_The_Tags()
     {
         // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
-
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Removed;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Removed;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        tag1.Name = "Fix";
-        tag2.Name = "Change";
-        tag3.Name = "Add";
-        var tags = new Collection<Tag>();
-        var stringTags = new Collection<string>();
-        tags.Add(tag1);
-        tags.Add(tag2);
-        tags.Add(tag3);
-        stringTags.Add(tag1.Name);
-        stringTags.Add(tag2.Name);
-        stringTags.Add(tag3.Name);
-        task1.Tags = tags;
-        task3.Tags = tags;
-        
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
+        var tags = Tags2String();
         
         var t = new Collection<TaskDTO>();
-        t.Add(new TaskDTO(task1.Id, task1.Title, task1.AssignedTo.Name, stringTags, task1.State));
-        t.Add(new TaskDTO(task3.Id, task3.Title, task3.AssignedTo.Name, stringTags, task3.State));
+        t.Add(new TaskDTO(4, "taskSomething", "MyName", tags, State.Removed));
 
         var expected = new ReadOnlyCollection<TaskDTO>(t);
         
         // Act
-        var actual = taskRepo.ReadAllByTag("Fix");
+        var actual = _repository.ReadAllByTag("Help");
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
-    public void ReadAllByUser_Should_Only_Return_User_2()
+    public void ReadAllByUser_Should_Only_Return_User_3()
     {
         // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
-
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Removed;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Removed;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        user1.Id = 1;
-        user2.Id = 2;
-        user3.Id = 3;
-        user4.Id = 4;
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        tag1.Name = "Fix";
-        tag2.Name = "Change";
-        tag3.Name = "Add";
-        var stringTags = new Collection<string>();
-
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
+        var tags = TagsString();
         
         var t = new Collection<TaskDTO>();
-        t.Add(new TaskDTO(task2.Id, task2.Title, task2.AssignedTo.Name, stringTags, task2.State));
+        t.Add(new TaskDTO(3, "taskAlgorithm", "Lucas", tags, State.New));
 
         var expected = new ReadOnlyCollection<TaskDTO>(t);
         
         // Act
-        var actual = taskRepo.ReadAllByUser(2);
+        var actual = _repository.ReadAllByUser(3);
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
@@ -369,66 +171,60 @@ public class TaskRepositoryTests
     public void ReadAllByState_Should_Only_Return_task_2()
     {
         // Arrange
-        TaskRepository taskRepo = new TaskRepository();
-        Task task1 = new Task();
-        Task task2 = new Task();
-        Task task3 = new Task();
-        Task task4 = new Task();
-
-        task1.Description = "Her kommer";
-        task2.Description = "Pippi Langstromp";
-        task3.Description = "Chula hop";
-        task4.Description = "Chula hey";
-        task1.Id = 1;
-        task2.Id = 2;
-        task3.Id = 3;
-        task4.Id = 4;
-        task1.State = State.Removed;
-        task2.State = State.Closed;
-        task3.State = State.New;
-        task4.State = State.Removed;
-        task1.Title = "strofe1";
-        task2.Title = "strofe2";
-        task3.Title = "strofe3";
-        task4.Title = "strofe4";
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-        User user4 = new User();
-        user1.Name = "Bank";
-        user2.Name = "Silas";
-        user3.Name = "Lucas";
-        user4.Name = "MyName";
-        user1.Id = 1;
-        user2.Id = 2;
-        user3.Id = 3;
-        user4.Id = 4;
-        task1.AssignedTo = user1;
-        task2.AssignedTo = user2;
-        task3.AssignedTo = user3;
-        task4.AssignedTo = user4;
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        tag1.Name = "Fix";
-        tag2.Name = "Change";
-        tag3.Name = "Add";
-        var stringTags = new Collection<string>();
-
-        taskRepo.tasks.Add(task1);
-        taskRepo.tasks.Add(task2);
-        taskRepo.tasks.Add(task3);
-        taskRepo.tasks.Add(task4);
+        var tags = TagsString();
         
         var t = new Collection<TaskDTO>();
-        t.Add(new TaskDTO(task2.Id, task2.Title, task2.AssignedTo.Name, stringTags, task2.State));
+        t.Add(new TaskDTO(2, "taskAI", "Silas", tags, State.Closed));
 
         var expected = new ReadOnlyCollection<TaskDTO>(t);
         
         // Act
-        var actual = taskRepo.ReadAllByState(State.Closed);
+        var actual = _repository.ReadAllByState(State.Closed);
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void Read_Should_Only_Send_User_4_Back()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var expected = new TaskDetailsDTO(4, "taskSomething", "Get something set up", time, "MyName", tags,
+            State.Removed, time);
+
+        // Act
+        var actual = _repository.Read(4);
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void Update_Should_Respond_Updated()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var taskUpdate = new TaskUpdateDTO(3, "Updated", 10, "Definitely Updated", tags, State.Resolved);
+        
+        // Act
+        var actual = _repository.Update(taskUpdate);
+        
+        // Assert
+        Assert.Equal(Response.Updated, actual);
+    }
+
+    [Fact]
+    public void Update_Should_Respond_NotFound()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var taskUpdate = new TaskUpdateDTO(5, "Updated", 10, "Definitely Updated", tags, State.Resolved);
+        
+        // Act
+        var actual = _repository.Update(taskUpdate);
+        
+        // Assert
+        Assert.Equal(Response.NotFound, actual);
     }
 }
