@@ -130,11 +130,47 @@ public class TaskRepository : ITaskRepository
         
     public TaskDetailsDTO Read(int taskId)
     {
+        //foreach (var task in tasks)
+        //{
+        //    var tags = new Collection<string>();
+        //    if (task.Tags != null)
+        //    {
+        //        foreach (var t in task.Tags)
+        //        {
+        //            tags.Add(t.Name);
+        //        }
+        //    }
+
+        //    if (task.Id == taskId)
+        //    {
+        //       return new TaskDetailsDTO(task.Id, task.Title, task.Description, DateTime.Now, task.AssignedTo.Name, tags, task.State, DateTime.Now);
+        //    }
+        //}
         throw new NotImplementedException();
     }
     public Response Update(TaskUpdateDTO task)
     {
-        throw new NotImplementedException();
+        foreach (var t in tasks)
+        {
+            if(t.Id == task.Id)
+            {
+                t.Title = task.Title;
+                t.AssignedTo.Id = task.AssignedToId.Value;
+                t.Description ??= task.Description;
+                
+                var tags = new Collection<Tag>();
+                foreach (var tag in task.Tags) {
+                    Tag tempTag = new Tag();
+                    tempTag.Name = tag;
+                    tags.Add(tempTag);
+                }
+                t.Tags = tags;
+                t.State = task.State;
+
+                return Response.Updated;
+            }
+        }
+        return Response.NotFound;
     }
     public Response Delete(int taskId)
     {

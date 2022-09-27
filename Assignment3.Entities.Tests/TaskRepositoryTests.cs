@@ -431,4 +431,140 @@ public class TaskRepositoryTests
         // Assert
         actual.Should().BeEquivalentTo(expected);
     }
+
+    [Fact]
+    public void Update_Should_Responde_Updated()
+    {
+        // Arrange
+        TaskRepository taskRepo = new TaskRepository();
+        Task task1 = new Task();
+        Task task2 = new Task();
+        Task task3 = new Task();
+        Task task4 = new Task();
+
+        task1.Description = "Her kommer";
+        task2.Description = "Pippi Langstromp";
+        task3.Description = "Chula hop";
+        task4.Description = "Chula hey";
+        task1.Id = 1;
+        task2.Id = 2;
+        task3.Id = 3;
+        task4.Id = 4;
+        task1.State = State.Removed;
+        task2.State = State.Closed;
+        task3.State = State.New;
+        task4.State = State.Removed;
+        task1.Title = "strofe1";
+        task2.Title = "strofe2";
+        task3.Title = "strofe3";
+        task4.Title = "strofe4";
+        User user1 = new User();
+        User user2 = new User();
+        User user3 = new User();
+        User user4 = new User();
+        user1.Name = "Bank";
+        user2.Name = "Silas";
+        user3.Name = "Lucas";
+        user4.Name = "MyName";
+        task1.AssignedTo = user1;
+        task2.AssignedTo = user2;
+        task3.AssignedTo = user3;
+        task4.AssignedTo = user4;
+        Tag tag1 = new Tag();
+        Tag tag2 = new Tag();
+        Tag tag3 = new Tag();
+        tag1.Name = "Fix";
+        tag2.Name = "Change";
+        tag3.Name = "Add";
+        var tags = new Collection<Tag>();
+        var stringTags = new Collection<string>();
+        tags.Add(tag1);
+        tags.Add(tag2);
+        tags.Add(tag3);
+        stringTags.Add(tag1.Name);
+        stringTags.Add(tag2.Name);
+        stringTags.Add(tag3.Name);
+        task1.Tags = tags;
+        task3.Tags = tags;
+        
+        taskRepo.tasks.Add(task1);
+        taskRepo.tasks.Add(task2);
+        taskRepo.tasks.Add(task3);
+        taskRepo.tasks.Add(task4);
+        
+        // Act
+        var taskUpdate = new TaskUpdateDTO(task1.Id, task1.Title, task1.AssignedTo.Id, task1.Description, stringTags, task1.State);
+        var actual = taskRepo.Update(taskUpdate);
+        
+        // Assert
+        Assert.Equal(Response.Updated, actual);
+    }
+
+    [Fact]
+    public void Update_Should_Responde_NotFound()
+    {
+        // Arrange
+        TaskRepository taskRepo = new TaskRepository();
+        Task task1 = new Task();
+        Task task2 = new Task();
+        Task task3 = new Task();
+        Task task4 = new Task();
+
+        task1.Description = "Her kommer";
+        task2.Description = "Pippi Langstromp";
+        task3.Description = "Chula hop";
+        task4.Description = "Chula hey";
+        task1.Id = 1;
+        task2.Id = 2;
+        task3.Id = 3;
+        task4.Id = 4;
+        task1.State = State.Removed;
+        task2.State = State.Closed;
+        task3.State = State.New;
+        task4.State = State.Removed;
+        task1.Title = "strofe1";
+        task2.Title = "strofe2";
+        task3.Title = "strofe3";
+        task4.Title = "strofe4";
+        User user1 = new User();
+        User user2 = new User();
+        User user3 = new User();
+        User user4 = new User();
+        user1.Name = "Bank";
+        user2.Name = "Silas";
+        user3.Name = "Lucas";
+        user4.Name = "MyName";
+        task1.AssignedTo = user1;
+        task2.AssignedTo = user2;
+        task3.AssignedTo = user3;
+        task4.AssignedTo = user4;
+        Tag tag1 = new Tag();
+        Tag tag2 = new Tag();
+        Tag tag3 = new Tag();
+        tag1.Name = "Fix";
+        tag2.Name = "Change";
+        tag3.Name = "Add";
+        var tags = new Collection<Tag>();
+        var stringTags = new Collection<string>();
+        tags.Add(tag1);
+        tags.Add(tag2);
+        tags.Add(tag3);
+        stringTags.Add(tag1.Name);
+        stringTags.Add(tag2.Name);
+        stringTags.Add(tag3.Name);
+        task1.Tags = tags;
+        task3.Tags = tags;
+        
+        taskRepo.tasks.Add(task1);
+        taskRepo.tasks.Add(task2);
+        taskRepo.tasks.Add(task3);
+        taskRepo.tasks.Add(task4);
+        
+        // Act
+        var taskUpdate = new TaskUpdateDTO(5, task1.Title, task1.AssignedTo.Id, task1.Description, stringTags, task1.State);
+        var actual = taskRepo.Update(taskUpdate);
+        
+        // Assert
+        Assert.Equal(Response.NotFound, actual);
+    }
 }
