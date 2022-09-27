@@ -13,7 +13,15 @@ public class TaskRepository : ITaskRepository
     }
     public (Response Response, int TaskId) Create(TaskCreateDTO task)
     {
-        throw new NotImplementedException();
+        Collection<Tag> tags = new Collection<Tag>();
+        foreach (var t in task.Tags)
+        {
+            tags.Add(new Tag(){Name = t});
+        }
+        var temp = new Task() { Title = task.Title, AssignedTo = new User() {Id = task.AssignedToId.Value, Name = "Mommy", Email = ""}, Description = task.Description, Tags = tags };
+        _context.Tasks.Add(temp);
+        _context.SaveChanges();
+        return (Response.Created, temp.Id);
     }
     
     public IReadOnlyCollection<TaskDTO> ReadAll()
@@ -134,23 +142,24 @@ public class TaskRepository : ITaskRepository
         
     public TaskDetailsDTO Read(int taskId)
     {
-        //foreach (var task in tasks)
-        //{
-        //    var tags = new Collection<string>();
-        //    if (task.Tags != null)
-        //    {
-        //        foreach (var t in task.Tags)
-        //        {
-        //            tags.Add(t.Name);
-        //        }
-        //    }
+        foreach (var task in _context.Tasks)
+        {
+            var tags = new Collection<string>();
+            if (task.Tags != null)
+            {
+                foreach (var t in task.Tags)
+                {
+                    tags.Add(t.Name);
+                }
+            }
 
-        //    if (task.Id == taskId)
-        //    {
-        //       return new TaskDetailsDTO(task.Id, task.Title, task.Description, DateTime.Now, task.AssignedTo.Name, tags, task.State, DateTime.Now);
-        //    }
-        //}
-        throw new NotImplementedException();
+            if (task.Id == taskId)
+            {
+               return new TaskDetailsDTO(task.Id, task.Title, task.Description, task.Created, task.AssignedTo.Name, tags, task.State, task.StateUpdated);
+            }
+        }
+
+        return new TaskDetailsDTO(-1, "NotFound", "", DateTime.Now, "NoOne", new Collection<string>(){"none"}, State.Closed, DateTime.Now);
     }
     public Response Update(TaskUpdateDTO task)
     {
@@ -170,6 +179,7 @@ public class TaskRepository : ITaskRepository
                 }
                 t.Tags = tags;
                 t.State = task.State;
+                t.StateUpdated = DateTime.Now;
 
                 return Response.Updated;
             }

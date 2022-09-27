@@ -10,4 +10,8 @@ public class Task
     public string Description { get; set; } = null!;
     public State State { get; set; }
     public ICollection<Tag> Tags { get; set; }
+
+    public DateTime Created { get; set; }
+    
+    public DateTime StateUpdated { get; set; }
 }

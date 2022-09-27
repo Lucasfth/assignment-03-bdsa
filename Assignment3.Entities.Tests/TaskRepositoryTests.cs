@@ -9,6 +9,8 @@ public class TaskRepositoryTests
 {
     private readonly KanbanContext _context;
     private readonly TaskRepository _repository;
+    
+    private DateTime time = new DateTime(2022, 12, 1);
 
     public TaskRepositoryTests()
     {
@@ -25,10 +27,10 @@ public class TaskRepositoryTests
         var tags = Tags();
         var tags2 = Tags2();
         context.Users.AddRange(user1, user2, user3, user4);
-        context.Tasks.AddRange(new Task() { Title = "taskSQL" , AssignedTo = user1, Description = "Get SQL set up for program", State = State.Active, Tags = tags}, 
-            new Task() { Title = "taskAI", AssignedTo = user2,Description = "Set up AI for program", State = State.Closed, Tags = tags},
-            new Task() { Title = "taskAlgorithm", AssignedTo = user3, Description = "Set up algorithm", State = State.New, Tags = tags},
-            new Task() { Title = "taskSomething", AssignedTo = user4, Description = "Get something set up", State = State.Removed, Tags = tags2});
+        context.Tasks.AddRange(new Task() { Title = "taskSQL" , AssignedTo = user1, Description = "Get SQL set up for program", State = State.Active, Tags = tags, Created = time, StateUpdated = time}, 
+            new Task() { Title = "taskAI", AssignedTo = user2,Description = "Set up AI for program", State = State.Closed, Tags = tags, Created = time, StateUpdated = time},
+            new Task() { Title = "taskAlgorithm", AssignedTo = user3, Description = "Set up algorithm", State = State.New, Tags = tags, Created = time, StateUpdated = time},
+            new Task() { Title = "taskSomething", AssignedTo = user4, Description = "Get something set up", State = State.Removed, Tags = tags2, Created = time, StateUpdated = time});
         context.SaveChanges();
 
         _context = context;
@@ -73,6 +75,21 @@ public class TaskRepositoryTests
         var tags = new Collection<string>();
         tags.Add("Help");
         return tags;
+    }
+
+    [Fact]
+    public void Create_Should_Return_Created()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var t = new TaskCreateDTO("New one", 6, "Another one", tags);
+        var expected = (Response.Created, 5);
+        
+        // Act
+        var actual = _repository.Create(t);
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
@@ -163,6 +180,21 @@ public class TaskRepositoryTests
         
         // Act
         var actual = _repository.ReadAllByState(State.Closed);
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void Read_Should_Only_Send_User_4_Back()
+    {
+        // Arrange
+        var tags = Tags2String();
+        var expected = new TaskDetailsDTO(4, "taskSomething", "Get something set up", time, "MyName", tags,
+            State.Removed, time);
+
+        // Act
+        var actual = _repository.Read(4);
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
