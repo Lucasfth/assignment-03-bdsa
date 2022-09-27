@@ -6,7 +6,11 @@ namespace Assignment3.Entities;
 
 public class TaskRepository : ITaskRepository
 {
-    public Collection<Task> tasks = new Collection<Task>();
+    public KanbanContext _context;
+    public TaskRepository(KanbanContext context)
+    {
+        _context = context;
+    }
     public (Response Response, int TaskId) Create(TaskCreateDTO task)
     {
         throw new NotImplementedException();
@@ -15,7 +19,7 @@ public class TaskRepository : ITaskRepository
     public IReadOnlyCollection<TaskDTO> ReadAll()
     {
         var temp = new Collection<TaskDTO>();
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var t = new Collection<string>();
 
@@ -35,7 +39,7 @@ public class TaskRepository : ITaskRepository
     public IReadOnlyCollection<TaskDTO> ReadAllRemoved()
     {
         var temp = new Collection<TaskDTO>();
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var t = new Collection<string>();
             
@@ -58,7 +62,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             if (task.Tags != null)
             {
@@ -84,7 +88,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var tags = new Collection<string>();
             if (task.Tags != null)
@@ -108,7 +112,7 @@ public class TaskRepository : ITaskRepository
     {
         var temp = new Collection<TaskDTO>();
 
-        foreach (var task in tasks)
+        foreach (var task in _context.Tasks)
         {
             var tags = new Collection<string>();
             if (task.Tags != null)
@@ -150,15 +154,15 @@ public class TaskRepository : ITaskRepository
     }
     public Response Update(TaskUpdateDTO task)
     {
-        foreach (var t in tasks)
+        foreach (var t in _context.Tasks)
         {
             if(t.Id == task.Id)
             {
                 t.Title = task.Title;
                 t.AssignedTo.Id = task.AssignedToId.Value;
-                t.Description ??= task.Description;
+                t.Description = task.Description;
                 
-                var tags = new Collection<Tag>();
+                var tags = new List<Tag>();
                 foreach (var tag in task.Tags) {
                     Tag tempTag = new Tag();
                     tempTag.Name = tag;

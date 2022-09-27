@@ -13,7 +13,7 @@ internal class KanbanContextFactory : IDesignTimeDbContextFactory<KanbanContext>
         var connectionString = configuration.GetConnectionString("Kanban");
 
         var optionsBuilder = new DbContextOptionsBuilder<KanbanContext>();
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseSqlServer(connectionString);
 
         return new KanbanContext(optionsBuilder.Options);
     }
