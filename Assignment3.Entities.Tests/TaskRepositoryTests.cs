@@ -227,4 +227,27 @@ public class TaskRepositoryTests
         // Assert
         Assert.Equal(Response.NotFound, actual);
     }
+
+    [Fact]
+    public void Delete_Should_Respond_NotFound_Given_Id_5()
+    {
+        // Arrange
+        
+        // Act
+        var actual = _repository.Delete(5);
+        
+        // Assert
+        Assert.Equal(Response.NotFound, actual);
+    }
+
+    [Fact]
+    public void Delete_Should_Respond_Deleted_Given_Id_3()
+    {
+        // Arrange
+        // Act
+        var actual = _repository.Delete(3);
+        
+        // Assert
+        Assert.Equal(Response.Deleted, actual);
+    }
 }

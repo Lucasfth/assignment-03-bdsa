@@ -68,11 +68,21 @@ public class TagRepository : ITagRepository
     {
         foreach (var t in _context.Tags)
         {
-            if(t.Id == tagId)
+            if (t.Id == tagId)
             {
-                _context.Remove(t);
-                _context.SaveChanges();
-                return Response.Deleted;
+                if (t.Tasks == null)
+                {
+                    _context.Remove(t);
+                    _context.SaveChanges();
+                    return Response.Deleted;
+                } else if (t.Tasks.Count > 0 && force)
+                {
+                    _context.Remove(t);
+                    _context.SaveChanges();
+                    return Response.Deleted;
+                }
+                else
+                    return Response.Conflict;
             }
         }
         return Response.NotFound;

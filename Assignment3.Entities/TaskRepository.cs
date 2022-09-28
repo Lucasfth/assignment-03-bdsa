@@ -18,7 +18,7 @@ public class TaskRepository : ITaskRepository
         {
             tags.Add(new Tag(){Name = t});
         }
-        var temp = new Task() { Title = task.Title, AssignedTo = new User() {Id = task.AssignedToId.Value, Name = "Mommy", Email = ""}, Description = task.Description, Tags = tags };
+        var temp = new Task() { Title = task.Title, AssignedTo = new User() {Id = task.AssignedToId.Value, Name = "Mommy", Email = ""}, Description = task.Description, Tags = tags , State = State.New, Created = DateTime.UtcNow.Date, StateUpdated = DateTime.UtcNow.Date};
         _context.Tasks.Add(temp);
         _context.SaveChanges();
         return (Response.Created, temp.Id);
@@ -80,15 +80,15 @@ public class TaskRepository : ITaskRepository
                 {
                     tags.Add(t.Name);
                     if (t.Name == tag)
-                    {
                         shouldInsert = true;
-                    }
                 }
                 if (shouldInsert)
                     temp.Add(new TaskDTO(task.Id, task.Title, task.AssignedTo.Name, tags, task.State));
             }
         }
 
+        if (temp.Count == 0)
+            return null;
         return new ReadOnlyCollection<TaskDTO>(temp);
     }
 
@@ -108,11 +108,11 @@ public class TaskRepository : ITaskRepository
             }
 
             if (task.AssignedTo.Id == userId)
-            {
                 temp.Add(new TaskDTO(task.Id, task.Title, task.AssignedTo.Name, tags, task.State));
-            }
         }
 
+        if (temp.Count == 0) 
+            return null;
         return new ReadOnlyCollection<TaskDTO>(temp);
     }
 
@@ -179,7 +179,7 @@ public class TaskRepository : ITaskRepository
                 }
                 t.Tags = tags;
                 t.State = task.State;
-                t.StateUpdated = DateTime.Now;
+                t.StateUpdated = DateTime.UtcNow.Date;
 
                 return Response.Updated;
             }
@@ -188,6 +188,24 @@ public class TaskRepository : ITaskRepository
     }
     public Response Delete(int taskId)
     {
-        throw new NotImplementedException();
+        foreach (var t in _context.Tasks)
+        {
+            if(t.Id == taskId)
+            {
+                if (t.State == State.New)
+                {
+                    _context.Remove(t);
+                    _context.SaveChanges();
+                    return Response.Deleted;
+                } else if (t.State == State.Active)
+                {
+                    t.State = State.Removed;
+                    return Response.Updated;
+                }
+                else
+                    return Response.Conflict;
+            }
+        }
+        return Response.NotFound;
     }
 }
