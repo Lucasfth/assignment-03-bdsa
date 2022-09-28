@@ -5,20 +5,25 @@ using System.Diagnostics.Tracing;
 
 public class TagRepository : ITagRepository
 {
-
-    public Collection<Tag> tags = new Collection<Tag>();
-
+    
+    public KanbanContext _context;
+    
+    public TagRepository(KanbanContext context)
+    {
+        _context = context;
+    }
 
     public (Response Response, int TagId) Create(TagCreateDTO tag)
     {
-        foreach (var t in tags)
+        foreach (var t in _context.Tags)
         {
             if (t.Name.Equals(tag.Name)){
                 return (Response.Conflict, t.Id);
             }
         }
-        Tag tg = new Tag();
-        tg.Name = tag.Name;
+        Tag tg = new Tag(){Name = tag.Name};
+        _context.Tags.Add(tg);
+        _context.SaveChanges();
         return (Response.Created, tg.Id);
     }
 
@@ -26,7 +31,7 @@ public class TagRepository : ITagRepository
     {
         var temp = new Collection<TagDTO>();
         
-        foreach (var tag in tags)
+        foreach (var tag in _context.Tags)
         {
            temp.Add(new TagDTO(tag.Id, tag.Name));
         }
@@ -49,7 +54,7 @@ public class TagRepository : ITagRepository
 
     public Response Update(TagUpdateDTO tag)
     {   
-        foreach (var t in tags)
+        foreach (var t in _context.Tags)
         {   
             if (t.Id == tag.Id && !t.Name.Equals(tag.Name)){
                 t.Name = tag.Name;
@@ -61,10 +66,12 @@ public class TagRepository : ITagRepository
 
     public Response Delete(int tagId, bool force = false)
     {
-        foreach (var t in tags)
+        foreach (var t in _context.Tags)
         {
-            if(t.Id == tagId){
-                tags.Remove(t);
+            if(t.Id == tagId)
+            {
+                _context.Remove(t);
+                _context.SaveChanges();
                 return Response.Deleted;
             }
         }

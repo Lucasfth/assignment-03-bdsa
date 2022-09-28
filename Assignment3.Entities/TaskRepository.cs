@@ -6,7 +6,7 @@ namespace Assignment3.Entities;
 
 public class TaskRepository : ITaskRepository
 {
-    public KanbanContext _context;
+    private KanbanContext _context;
     public TaskRepository(KanbanContext context)
     {
         _context = context;
