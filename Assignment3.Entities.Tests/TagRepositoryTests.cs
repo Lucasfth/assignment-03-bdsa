@@ -28,6 +28,13 @@ public class TagRepositoryTests
         son3.Name = "Sonny";
         son4.Name = "SonnyB";
 
+        User user = new User() { Email = "mail", Name = "Bent" };
+        Task task = new Task() { Title = "fixIt", AssignedTo = user, Created = DateTime.UtcNow.Date, Description = "fix it godamn", State = State.Active, StateUpdated = DateTime.UtcNow.Date };
+        var col = new Collection<Task>();
+        col.Add(task);
+
+        son4.Tasks = col;
+        
         context.Tags.AddRange(son1, son2, son3, son4);
 
         context.SaveChanges();
@@ -140,6 +147,28 @@ public class TagRepositoryTests
     
         // Assert
         Assert.Equal(Response.Deleted, actual);
+    }
+
+    [Fact]
+    public void Delete_Should_Respond_Deleted_Using_Force()
+    {
+        // Arrange
+        // Act
+        var actual = _repository.Delete(4, true);
+        
+        // Assert
+        Assert.Equal(Response.Deleted, actual);
+    }
+
+    [Fact]
+    public void Delete_Should_Respond_Conflict_When_Not_Given_Force()
+    {
+        // Arrange
+        // Act
+        var actual = _repository.Delete(4);
+        
+        // Assert
+        Assert.Equal(Response.Conflict, actual);
     }
     
 }
