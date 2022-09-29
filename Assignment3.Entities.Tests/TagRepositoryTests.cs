@@ -73,10 +73,10 @@ public class TagRepositoryTests
         // Arrange
         
         // Act
-        var output = _repository.Create(new TagCreateDTO("SonnyB"));
+        var actual = _repository.Create(new TagCreateDTO("SonnyB"));
         
         // Assert
-        Assert.Equal((Response.Conflict, 4), output);
+        Assert.Equal((Response.Conflict, 4), actual);
     }
 
     [Fact]
@@ -85,10 +85,10 @@ public class TagRepositoryTests
         // Arrange
 
         // Act
-        var output = _repository.Create(new TagCreateDTO("MyName"));
+        var actual = _repository.Create(new TagCreateDTO("MyName"));
         
         // Assert
-        Assert.Equal((Response.Created, 5), output);
+        Assert.Equal((Response.Created, 5), actual);
     }
 
     [Fact]
@@ -96,11 +96,12 @@ public class TagRepositoryTests
     {
         // Arrange
         var expected = tagCol();
+
         // Act
-        var output = _repository.ReadAll();
+        var actual = _repository.ReadAll();
         
         // Assert
-        Assert.Equal(expected, output);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -109,10 +110,10 @@ public class TagRepositoryTests
          // Arrange
 
          // Act
-        var output = _repository.Read(1);
+        var actual = _repository.Read(1);
         
         // Assert
-        Assert.Equal(new TagDTO(1, "Son"), output);
+        Assert.Equal(new TagDTO(1, "Son"), actual);
     }
 
      [Fact]
@@ -122,6 +123,7 @@ public class TagRepositoryTests
 
         // Act
         var actual = _repository.Update(new TagUpdateDTO(1, "SonTheMan"));
+
         // Assert
         Assert.Equal(Response.Updated, actual);
     }
@@ -134,7 +136,7 @@ public class TagRepositoryTests
         // Act
         var actual = _repository.Update(new TagUpdateDTO(1, "Son"));
         // Assert
-        Assert.Equal(Response.NotFound, actual);
+        Assert.Equal(Response.Conflict, actual);
     }
 
     [Fact]
