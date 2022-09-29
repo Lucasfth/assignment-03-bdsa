@@ -79,7 +79,7 @@ public class TaskRepository : ITaskRepository
                 foreach (var t in task.Tags)
                 {
                     tags.Add(t.Name);
-                    if (t.Name == tag)
+                    if (t.Name.Equals(tag))
                         shouldInsert = true;
                 }
                 if (shouldInsert)
@@ -159,7 +159,7 @@ public class TaskRepository : ITaskRepository
             }
         }
 
-        return new TaskDetailsDTO(-1, "NotFound", "", DateTime.Now, "NoOne", new Collection<string>(){"none"}, State.Closed, DateTime.Now);
+        return null;
     }
     public Response Update(TaskUpdateDTO task)
     {
@@ -200,6 +200,7 @@ public class TaskRepository : ITaskRepository
                 } else if (t.State == State.Active)
                 {
                     t.State = State.Removed;
+                    t.StateUpdated = DateTime.UtcNow.Date;
                     return Response.Updated;
                 }
                 else

@@ -45,11 +45,11 @@ public class TagRepository : ITagRepository
         {
             if (tag.Id == tagId)
             {
-                return tag;
+                return new TagDTO(tag.Id, tag.Name);
             }
         }
 
-        return new TagDTO(-1, "");
+        return null;
     }
 
     public Response Update(TagUpdateDTO tag)
@@ -59,7 +59,8 @@ public class TagRepository : ITagRepository
             if (t.Id == tag.Id && !t.Name.Equals(tag.Name)){
                 t.Name = tag.Name;
                 return Response.Updated;
-            }
+            } else
+                return Response.Conflict;
         }  
         return Response.NotFound;
     }
