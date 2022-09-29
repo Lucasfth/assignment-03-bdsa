@@ -25,6 +25,7 @@ namespace Assignment3.Entities
             modelBuilder.Entity<Task>(entity =>
             {
                 entity.Property(e => e.Title).HasMaxLength(100);
+                entity.Property(e => e.State).HasConversion(v => v.ToString(), v => (Assignment3.Core.State)Enum.Parse(typeof(Assignment3.Core.State), v));
             });
 
             modelBuilder.Entity<User>(entity =>
